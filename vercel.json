@@ -1,0 +1,13 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "frame-ancestors 'self' http://staffbase.com https://app.staffbase.com capacitor://staffbase.com;"
+        }
+      ]
+    }
+  ]
+}
