@@ -351,10 +351,19 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--staffbase-borderColor);
-  padding: 5px;
+  background-color: var(--staffbase-lighterGray);
   box-sizing: border-box;
+  border-radius: 50%;
+  color: var(--staffbase-gray);
+  font-weight: 600;
 }
+
+.avatar-initials {
+  font-size: 1em;
+  line-height: 1;
+  user-select: none;
+}
+
 
 .status-cell {
   display: flex;
