@@ -188,17 +188,156 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
   };
   
+  // -----------------------------------------------------------------
+  // --- START OF MODIFIED SECTION ---
+  // -----------------------------------------------------------------
+
+  // Data provided by the user
+  const dummyUsers = [
+    {"activated":"2025-04-25T22:29:38.056Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd28b13114916ddd794.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_48,w_48/680c0cd28b13114916ddd794.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_200,w_200/680c0cd28b13114916ddd794.jpg"}},"firstName":"Maria","id":"680c0cd13efa2971fe53c4c6","lastName":"Apathangelou"},
+    {"activated":"2025-04-25T22:29:38.070Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd24afce639ce51b312.png"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_355,h_355,x_35/c_fill,w_48,h_48/680c0cd24afce639ce51b312.png"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_355,h_355,x_35/c_fill,w_200,h_200/680c0cd24afce639ce51b312.png"}},"firstName":"Nicole","id":"680c0cd13efa2971fe53c4c7","lastName":"Adams"},
+    {"activated":"2025-04-25T22:29:38.056Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd378bf420054667f58.png"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_48,w_48/680c0cd378bf420054667f58.png"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_200,w_200/680c0cd378bf420054667f58.png"}},"firstName":"Mohammed","id":"680c0cd14afce639ce51b2fc","lastName":"Ashour"},
+    {"activated":"2025-04-25T22:29:38.070Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd2de2a9177ea26b368.png"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_416,h_416,x_50/c_fill,w_48,h_48/680c0cd2de2a9177ea26b368.png"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_416,h_416,x_50/c_fill,w_200,h_200/680c0cd2de2a9177ea26b368.png"}},"firstName":"Patrick","id":"680c0cd178bf420054667f42","lastName":"Anderson"},
+    {"activated":"2025-04-25T22:29:38.031Z","avatar":null,"firstName":"Sminu","id":"680c0cd18b13114916ddd776","lastName":"Abraham"},
+    {"activated":"2025-04-25T22:29:38.332Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd38b13114916ddd799.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_48,w_48/680c0cd38b13114916ddd799.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_200,w_200/680c0cd38b13114916ddd799.jpg"}},"firstName":"Marcus","id":"680c0cd23efa2971fe53c4da","lastName":"Barlow"},
+    {"activated":"2025-04-25T22:29:39.652Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd44afce639ce51b334.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_48,w_48/680c0cd44afce639ce51b334.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_200,w_200/680c0cd44afce639ce51b334.jpg"}},"firstName":"Davide","id":"680c0cd34afce639ce51b31f","lastName":"Bonchamp"},
+    {"activated":"2025-04-25T22:29:40.054Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd578bf420054667f87.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_48,w_48/680c0cd578bf420054667f87.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_200,w_200/680c0cd578bf420054667f87.jpg"}},"firstName":"Henry","id":"680c0cd34afce639ce51b325","lastName":"Fitz"},
+    {"activated":"2025-04-25T22:29:39.983Z","avatar":{"original":{"width":7680,"height":5120,"size":765815,"format":"jpg","mimeType":"image/jpeg","url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_5120,h_5120,x_1280/68c22d512744f377da6cdf76.jpg"},"icon":{"format":"jpg","mimeType":"image/jpeg","url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_5120,h_5120,x_1280/c_fill,w_200,h_200/w_70,h_70/68c22d512744f377da6cdf76.jpg"},"thumb":{"format":"jpg","mimeType":"image/jpeg","url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_5120,h_5120,x_1280/c_fill,w_200,h_200/68c22d512744f377da6cdf76.jpg"}},"firstName":"Zan","id":"680c0cd378bf420054667f62","lastName":"Fingust"},
+    {"activated":"2025-04-25T22:29:39.949Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd478bf420054667f77.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_186,h_186,x_82/c_fill,w_48,h_48/680c0cd478bf420054667f77.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_186,h_186,x_82/c_fill,w_200,h_200/680c0cd478bf420054667f77.jpg"}},"firstName":"Fred","id":"680c0cd38b13114916ddd7a8","lastName":"Duchamp"},
+    {"activated":"2025-04-25T22:29:39.749Z","avatar":null,"firstName":"Jon","id":"680c0cd3de2a9177ea26b377","lastName":"Cochran"},
+    {"activated":"2025-04-25T22:29:40.052Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd63efa2971fe53c527.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_3072,h_3072,x_1517,y_300/c_fill,w_48,h_48/680c0cd63efa2971fe53c527.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_3072,h_3072,x_1517,y_300/c_fill,w_200,h_200/680c0cd63efa2971fe53c527.jpg"}},"firstName":"Frank","id":"680c0cd3de2a9177ea26b384","lastName":"Fox"},
+    {"activated":"2025-04-25T22:29:40.777Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd53efa2971fe53c518.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_281,h_281,x_32/c_fill,w_48,h_48/680c0cd53efa2971fe53c518.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_281,h_281,x_32/c_fill,w_200,h_200/680c0cd53efa2971fe53c518.jpg"}},"firstName":"Ron","id":"680c0cd44afce639ce51b33b","lastName":"Jacks"},
+    {"activated":"2025-04-25T22:29:40.284Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd43efa2971fe53c513.png"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_48,w_48/680c0cd43efa2971fe53c513.png"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_200,w_200/680c0cd43efa2971fe53c513.png"}},"firstName":"Ruby","id":"680c0cd48b13114916ddd7b8","lastName":"Gray"},
+    {"activated":"2025-04-25T22:29:40.505Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd578bf420054667f7b.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_48,w_48/680c0cd578bf420054667f7b.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_200,w_200/680c0cd578bf420054667f7b.jpg"}},"firstName":"Edward","id":"680c0cd48b13114916ddd7be","lastName":"Hall"},
+    {"activated":"2025-04-25T22:29:41.638Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd84afce639ce51b371.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_3262,h_3262,x_2399,y_0/c_fill,w_48,h_48/680c0cd84afce639ce51b371.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_3262,h_3262,x_2399,y_0/c_fill,w_200,h_200/680c0cd84afce639ce51b371.jpg"}},"firstName":"Thomas","id":"680c0cd53efa2971fe53c51b","lastName":"Lawrence"},
+    {"activated":"2025-04-25T22:29:41.422Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd7de2a9177ea26b3cd.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_48,w_48/680c0cd7de2a9177ea26b3cd.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_200,w_200/680c0cd7de2a9177ea26b3cd.jpg"}},"firstName":"Maya","id":"680c0cd578bf420054667f7e","lastName":"Kumar"},
+    {"activated":"2025-04-25T22:29:41.261Z","avatar":null,"firstName":"Klemen","id":"680c0cd58b13114916ddd7cb","lastName":"Jerman"},
+    {"activated":"2025-04-25T22:29:41.563Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd63efa2971fe53c523.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_1000,h_1000/c_fill,w_48,h_48/680c0cd63efa2971fe53c523.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_1000,h_1000/c_fill,w_200,h_200/680c0cd63efa2971fe53c523.jpg"}},"firstName":"Tom","id":"680c0cd5de2a9177ea26b3b3","lastName":"Künzer"},
+    {"activated":"2025-04-25T22:29:43.129Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd8de2a9177ea26b3ed.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_48,w_48/680c0cd8de2a9177ea26b3ed.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_200,w_200/680c0cd8de2a9177ea26b3ed.jpg"}},"firstName":"Zsofia","id":"680c0cd678bf420054667f97","lastName":"Lynn"},
+    {"activated":"2025-04-25T22:29:42.300Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd63efa2971fe53c530.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_449,h_449,x_39/c_fill,w_48,h_48/680c0cd63efa2971fe53c530.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_449,h_449,x_39/c_fill,w_200,h_200/680c0cd63efa2971fe53c530.jpg"}},"firstName":"Kay","id":"680c0cd68b13114916ddd7de","lastName":"Lion"},
+    {"activated":"2025-04-25T22:29:42.739Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd778bf420054667fa2.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_765,h_765,x_109/c_fill,w_48,h_48/680c0cd778bf420054667fa2.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_765,h_765,x_109/c_fill,w_200,h_200/680c0cd778bf420054667fa2.jpg"}},"firstName":"Todd","id":"680c0cd68b13114916ddd7e5","lastName":"Lu"},
+    {"activated":"2025-04-25T22:29:43.212Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd778bf420054667faa.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_1200,h_1200,y_7/c_fill,w_48,h_48/680c0cd778bf420054667faa.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_1200,h_1200,y_7/c_fill,w_200,h_200/680c0cd778bf420054667faa.jpg"}},"firstName":"Jan","id":"680c0cd6de2a9177ea26b3c8","lastName":"Morris"},
+    {"activated":"2025-04-25T22:29:43.490Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd88b13114916ddd806.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_675,h_675,x_444/c_fill,w_48,h_48/680c0cd88b13114916ddd806.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_675,h_675,x_444/c_fill,w_200,h_200/680c0cd88b13114916ddd806.jpg"}},"firstName":"Lutz","id":"680c0cd74afce639ce51b35d","lastName":"Morrison"},
+    {"activated":"2025-04-25T22:29:44.127Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cda3efa2971fe53c549.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_48,w_48/680c0cda3efa2971fe53c549.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_200,w_200/680c0cda3efa2971fe53c549.jpg"}},"firstName":"Elizabeth","id":"680c0cd74afce639ce51b363","lastName":"Rorke"},
+    {"activated":"2025-04-25T22:29:43.557Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd84afce639ce51b366.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_307,h_307,x_107/c_fill,w_48,h_48/680c0cd84afce639ce51b366.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_307,h_307,x_107/c_fill,w_200,h_200/680c0cd84afce639ce51b366.jpg"}},"firstName":"Joel","id":"680c0cd78b13114916ddd7f3","lastName":"Riggs"},
+    {"activated":"2025-04-25T22:29:45.133Z","avatar":null,"firstName":"Luisa","id":"680c0cd83efa2971fe53c541","lastName":"Schnepper"},
+    {"activated":"2025-04-25T22:29:44.364Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cdade2a9177ea26b40a.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_48,w_48/680c0cdade2a9177ea26b40a.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_200,w_200/680c0cdade2a9177ea26b40a.jpg"}},"firstName":"Anne","id":"680c0cd84afce639ce51b369","lastName":"Ryder"},
+    {"activated":"2025-04-25T22:29:44.795Z","avatar":null,"firstName":"Ishaan","id":"680c0cd878bf420054667fb3","lastName":"S"},
+    {"activated":"2025-04-25T22:29:44.357Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd878bf420054667fb6.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_391,h_391,x_8/c_fill,w_48,h_48/680c0cd878bf420054667fb6.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_391,h_391,x_8/c_fill,w_200,h_200/680c0cd878bf420054667fb6.jpg"}},"firstName":"Kelsey","id":"680c0cd8de2a9177ea26b3db","lastName":"Rupowski"},
+    {"activated":"2025-04-25T22:29:45.222Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd93efa2971fe53c548.png"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_312,h_312,x_32,y_35/c_fill,w_48,h_48/680c0cd93efa2971fe53c548.png"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_312,h_312,x_32,y_35/c_fill,w_200,h_200/680c0cd93efa2971fe53c548.png"}},"firstName":"Elisa","id":"680c0cd8de2a9177ea26b3ee","lastName":"Simmons"},
+    {"activated":"2025-04-25T22:29:45.497Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cda4afce639ce51b387.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_823,h_823/c_fill,w_48,h_48/680c0cda4afce639ce51b387.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_823,h_823/c_fill,w_200,h_200/680c0cda4afce639ce51b387.jpg"}},"firstName":"Melanie","id":"680c0cd98b13114916ddd825","lastName":"Smithson"},
+    {"activated":"2025-04-25T22:29:45.293Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cd978bf420054667fcc.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_800,h_800/c_fill,w_48,h_48/680c0cd978bf420054667fcc.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_800,h_800/c_fill,w_200,h_200/680c0cd978bf420054667fcc.jpg"}},"firstName":"Miranda","id":"680c0cd9de2a9177ea26b3f0","lastName":"Smith"},
+    {"activated":"2025-04-25T22:29:46.333Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cda78bf420054667fdf.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_413,h_413,x_105/c_fill,w_48,h_48/680c0cda78bf420054667fdf.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_413,h_413,x_105/c_fill,w_200,h_200/680c0cda78bf420054667fdf.jpg"}},"firstName":"Fiona","id":"680c0cda3efa2971fe53c54a","lastName":"Travis"},
+    {"activated":"2025-04-25T22:29:46.274Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cda3efa2971fe53c562.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_987,h_987,x_337/c_fill,w_48,h_48/680c0cda3efa2971fe53c562.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_987,h_987,x_337/c_fill,w_200,h_200/680c0cda3efa2971fe53c562.jpg"}},"firstName":"Steven","id":"680c0cda4afce639ce51b385","lastName":"Thompson"},
+    {"activated":"2025-04-25T22:29:46.476Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cdb4afce639ce51b39e.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_2320,h_2320,y_169/c_fill,w_48,h_48/680c0cdb4afce639ce51b39e.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_crop,w_2320,h_2320,y_169/c_fill,w_200,h_200/680c0cdb4afce639ce51b39e.jpg"}},"firstName":"Inna","id":"680c0cda8b13114916ddd831","lastName":"Zilberov"},
+    {"activated":"2025-04-25T22:29:46.448Z","avatar":{"original":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/680c0cdd3efa2971fe53c576.jpg"},"icon":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_48,w_48/680c0cdd3efa2971fe53c576.jpg"},"thumb":{"format":null,"mimeType":null,"url":"https://app.staffbase.com/api/media/secure/external/v2/image/upload/c_thumb,g_face,h_200,w_200/680c0cdd3efa2971fe53c576.jpg"}},"firstName":"Martin","id":"680c0cdade2a9177ea26b402","lastName":"Wolf"},
+    {"activated":"2025-08-27T17:22:22.266Z","avatar":null,"firstName":"Laura","id":"68af3d4bb17e9524c268c8da","lastName":"Turner"}
+  ];
+  
+  /**
+   * UPDATED: Generates dummy recipient data based on the provided user list
+   * and probabilistic rules.
+   */
   const getDummyData = () => {
     console.warn("Using dummy data for email performance widget.");
-    return [
-      { user: { id: "dummy1", firstName: "Nicole", lastName: "Adams", avatarUrl: "https://cdn.prod.website-files.com/65b3b9f9bfb500445a7573e5/65dda761c0fad5c4f2e3b9ae_OGS%20Female%20Student.png" }, sentTime: getRelativeDate(1, 2, 5), wasOpened: true, opens: [{ openTime: getRelativeDate(1, 1, 0), clicks: [{ clickTime: getRelativeDate(1, 0, 55), targetUrl: "https://www.staffbase.com/blog/" }] }] },
-      { user: { id: "dummy2", firstName: "Eira", lastName: "Topé", avatarUrl: null }, sentTime: getRelativeDate(1, 2, 5), wasOpened: true, opens: [{ openTime: getRelativeDate(0, 20, 0), clicks: [] }] },
-      { user: { id: "dummy3", firstName: "Jean", lastName: "Kirstein", avatarUrl: "" }, sentTime: getRelativeDate(1, 2, 5), wasOpened: false, opens: [] },
-      { user: { id: "dummy4", firstName: "Ash", lastName: "Krishnan", avatarUrl: null }, sentTime: getRelativeDate(1, 2, 5), wasOpened: true, opens: [{ openTime: getRelativeDate(0, 10, 30), clicks: [] }] },
-      { user: { id: "dummy5", firstName: "Shirley", lastName: "Lai", avatarUrl: null }, sentTime: getRelativeDate(1, 2, 5), wasOpened: false, opens: [] },
-      { user: { id: "dummy6", firstName: "Jon", lastName: "Lam", avatarUrl: null }, sentTime: getRelativeDate(1, 2, 5), wasOpened: false, opens: [] },
-    ];
+    
+    const results = [];
+    const urls = ['https://staffbase.com/', 'https://insights.staffbase.com/dm/schedule-demo'];
+
+    // Helper to get a random URL
+    const getRandomUrl = () => urls[Math.floor(Math.random() * urls.length)];
+    
+    // Helper to add random minutes to a base date
+    const addRandomTime = (baseDate, maxMinutes) => {
+        const newDate = new Date(baseDate);
+        newDate.setMinutes(newDate.getMinutes() + Math.floor(Math.random() * maxMinutes));
+        return newDate.toISOString();
+    };
+
+    // Define base times for events
+    const baseSentTime = new Date(getRelativeDate(1, 2, 5)); // 1d, 2h, 5m ago
+    const baseOpen1Time = new Date(getRelativeDate(1, 1, 0)); // 1d, 1h ago
+    const baseClick1Time = new Date(getRelativeDate(1, 0, 45)); // 1d, 45m ago
+    const baseOpen2Time = new Date(getRelativeDate(0, 20, 0)); // 20h ago
+    const baseClick2Time = new Date(getRelativeDate(0, 19, 45)); // 19h 45m ago
+    const baseOpen3Time = new Date(getRelativeDate(0, 10, 0)); // 10h ago
+    const baseClick3Time = new Date(getRelativeDate(0, 9, 45)); // 9h 45m ago
+
+    for (const user of dummyUsers) {
+      const interaction = {
+        user: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          // Use optional chaining to safely access nested avatar URL
+          avatarUrl: user.avatar?.thumb?.url || null,
+        },
+        sentTime: addRandomTime(baseSentTime, 10), // Add 0-10 min jitter to sent time
+        wasOpened: false,
+        opens: [],
+      };
+
+      // 50% chance to open
+      if (Math.random() < 0.50) {
+        interaction.wasOpened = true;
+        
+        // --- First Open ---
+        const open1 = {
+          openTime: addRandomTime(baseOpen1Time, 30), // 1h ago + 0-30m jitter
+          clicks: [],
+        };
+        // 40% chance to click on this open
+        if (Math.random() < 0.40) {
+          open1.clicks.push({
+            clickTime: addRandomTime(baseClick1Time, 10), // 45m ago + 0-10m jitter
+            targetUrl: getRandomUrl(),
+          });
+        }
+        interaction.opens.push(open1);
+
+        // 25% chance for a second open
+        if (Math.random() < 0.25) {
+          const open2 = {
+            openTime: addRandomTime(baseOpen2Time, 30), // 20h ago + 0-30m jitter
+            clicks: [],
+          };
+          // 40% chance to click on this open
+          if (Math.random() < 0.40) {
+            open2.clicks.push({
+              clickTime: addRandomTime(baseClick2Time, 10), // 19h 45m ago + 0-10m jitter
+              targetUrl: getRandomUrl(),
+            });
+          }
+          interaction.opens.push(open2);
+          
+          // 10% chance for a third open (only if they had a second)
+          if (Math.random() < 0.10) {
+            const open3 = {
+              openTime: addRandomTime(baseOpen3Time, 30), // 10h ago + 0-30m jitter
+              clicks: [],
+            };
+            // 40% chance to click on this open
+            if (Math.random() < 0.40) {
+              open3.clicks.push({
+                clickTime: addRandomTime(baseClick3Time, 10), // 9h 45m ago + 0-10m jitter
+                targetUrl: getRandomUrl(),
+              });
+            }
+            interaction.opens.push(open3);
+          }
+        }
+      }
+      
+      results.push(interaction);
+    }
+    
+    return results;
   };
+  
+  // -----------------------------------------------------------------
+  // --- END OF MODIFIED SECTION ---
+  // -----------------------------------------------------------------
+
 
   // --- DATA FETCHING LOGIC ---
 
@@ -498,7 +637,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (state.recipientData && state.recipientData.length > 0) {
       const selectedEmail = state.allEmails.find(e => e.id === state.selectedEmailId);
-      const totalRecipients = selectedEmail?.targetAudience?.totalRecipients ?? state.recipientData.length;
+      // Use the length of the dummy data as the total recipient count
+      const totalRecipients = state.recipientData.length;
       const totalOpens = state.recipientData.reduce((sum, interaction) => sum + interaction.opens.length, 0);
       const uniqueOpens = state.recipientData.filter(interaction => interaction.wasOpened).length;
       state.emailStats = { totalRecipients, totalOpens, uniqueOpens };
@@ -710,6 +850,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return 0;
       });
+    } else {
+        // Default sort by last name if no sort is selected
+        sortableData.sort((a, b) => 
+            a.user.lastName.localeCompare(b.user.lastName)
+        );
     }
     return sortableData;
   };
