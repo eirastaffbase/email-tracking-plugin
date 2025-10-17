@@ -4,17 +4,93 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Individual Email Tracking</title>
-  <style>
-    html,body{height:100%;margin:0}
-    body{display:flex;align-items:center;justify-content:center;font:16px system-ui, sans-serif}
-    h1{margin:0 0 6px}
-    p{opacity:.7;margin:.3rem 0 0}
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main>
-    <h1>Individual Email Tracking Plugin</h1>
-    <p>This will allow you to track individual email opens and interactions.</p>
-  </main>
+
+  <div class="email-performance-widget">
+    
+    <div id="loading-container" class="message-container">Loading...</div>
+    <div id="error-container" class="message-container" style="display: none;"></div>
+
+    <div id="list-view" style="display: none;">
+      <div class="widget-header list-view">
+        <h3 class="widget-title">Sent Email Overview</h3>
+        <div class="date-controls">
+          <label for="sinceDate">From:</label>
+          <input type="datetime-local" id="sinceDate" />
+          <label for="untilDate">To:</label>
+          <input type="datetime-local" id="untilDate" />
+        </div>
+      </div>
+      <div id="email-list-container">
+        </div>
+      <div id="email-pagination-container" class="pagination-controls">
+        <div class="page-size-control">
+          <label for="email-page-size">Show:</label>
+          <select id="email-page-size">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+        <div class="page-buttons">
+          <button id="email-prev-page">&lt;</button>
+          <span id="email-page-info"></span>
+          <button id="email-next-page">&gt;</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="detail-view" style="display: none;">
+      <div class="widget-header">
+        <button class="back-button" id="back-button">&lt;</button>
+        <h3 class="widget-title" id="detail-title">"Email Title" Performance</h3>
+      </div>
+      <div class="detail-view-controls">
+        <div class="filter-and-date-container">
+          <div class="recipient-filter">
+            <input type="text" id="recipient-search" placeholder="Filter recipients by name..." />
+          </div>
+          <div class="date-picker-group">
+            <label for="detailSinceDate">From:</label>
+            <input type="datetime-local" id="detailSinceDate" />
+            <label for="detailUntilDate">To:</label>
+            <input type="datetime-local" id="detailUntilDate" />
+          </div>
+        </div>
+        <div class="stats-and-export-container">
+          <div id="email-stats-container" class="email-stats-container">
+            </div>
+          <button class="export-csv-button" id="export-csv-button">
+            <span style="font-size: 1.2em; margin-right: 8px;">⤓</span>
+            Generate CSV
+          </button>
+        </div>
+      </div>
+      <div id="recipient-table-container">
+        </div>
+      <div id="recipient-pagination-container" class="pagination-controls">
+        <div class="page-size-control">
+          <label for="recipient-page-size">Show:</label>
+          <select id="recipient-page-size">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+        <div class="page-buttons">
+          <button id="recipient-prev-page">&lt;</button>
+          <span id="recipient-page-info"></span>
+          <button id="recipient-next-page">&gt;</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
