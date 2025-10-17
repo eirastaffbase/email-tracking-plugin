@@ -187,10 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: "dummy-email-3", title: "Townhall Briefing", thumbnailUrl: null, sentAt: getRelativeDate(15), sender: { name: "Nicole Adams" }, targetAudience: { totalRecipients: 85 } },
     ];
   };
-  
-  // -----------------------------------------------------------------
-  // --- START OF MODIFIED SECTION ---
-  // -----------------------------------------------------------------
 
   // Data provided by the user
   const dummyUsers = [
@@ -334,11 +330,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return results;
   };
   
-  // -----------------------------------------------------------------
-  // --- END OF MODIFIED SECTION ---
-  // -----------------------------------------------------------------
-
-
   // --- DATA FETCHING LOGIC ---
 
   const getSentEmailsData = async (domain, limit) => {
@@ -465,8 +456,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // --- REMAINDER OF THE CODE (UNCHANGED) ---
-  
   // --- RENDERING FUNCTIONS (replaces JSX) ---
 
   const processEvents = async (domain, events) => {
@@ -722,6 +711,10 @@ document.addEventListener('DOMContentLoaded', () => {
     return table;
   };
   
+  // -----------------------------------------------------------------
+  // --- START OF MODIFIED SECTION ---
+  // -----------------------------------------------------------------
+  
   const createRecipientRowElements = (interaction) => {
     const row = document.createElement('tr');
     const isExpandable = interaction.sentTime || interaction.opens.length > 0;
@@ -737,11 +730,17 @@ document.addEventListener('DOMContentLoaded', () => {
       statusHtml = `<span class="status-badge unknown">Unknown</span>`;
     }
     
+    // UPDATED: Added an 'onerror' handler to the <img> tag.
+    // We must escape the backticks (\`) inside the string literal.
+    // 'this.outerHTML' replaces the broken <img> tag with the default SVG icon.
     row.innerHTML = `
       <td>
         <div class="user-info">
           ${(interaction.user.avatarUrl && interaction.user.avatarUrl.startsWith('http'))
-            ? `<img src="${interaction.user.avatarUrl}" alt="${interaction.user.firstName} ${interaction.user.lastName}" class="user-avatar" />`
+            ? `<img src="${interaction.user.avatarUrl}" 
+                   alt="${interaction.user.firstName} ${interaction.user.lastName}" 
+                   class="user-avatar" 
+                   onerror="this.outerHTML = \`${createDefaultAvatarIcon('user-avatar')}\`" />`
             : createDefaultAvatarIcon('user-avatar')
           }
           <span>${interaction.user.firstName} ${interaction.user.lastName}</span>
@@ -802,6 +801,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     return [row, detailsRow];
   };
+
+  // -----------------------------------------------------------------
+  // --- END OF MODIFIED SECTION ---
+  // -----------------------------------------------------------------
 
   const createDefaultAvatarIcon = (className) => {
     return `
