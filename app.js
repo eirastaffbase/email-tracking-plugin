@@ -9,11 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
     defaultemailpagesize: 5,
     defaultrecipientpagesize: 5,
     enablecsvdownload: true,
-    emailid: undefined // Only used if allemailsview is false
+    emailid: undefined, // Only used if allemailsview is false
+    apiTimeout: 2000 // NEW: 2-second timeout for API calls
   };
 
   // --- GLOBAL STATE ---
-  // This object replaces React's `useState`
   const state = {
     currentView: config.allemailsview ? 'list' : 'detail',
     selectedEmailId: config.allemailsview ? undefined : config.emailid,
@@ -71,38 +71,35 @@ document.addEventListener('DOMContentLoaded', () => {
   const userProfileCache = new Map();
 
   /**
-   * Performs an authenticated fetch.
-   * NOTE: In a real web app, this would need proper authentication (e.g., cookies, tokens).
-   * Since the original code used a simple `fetch`, we assume auth is handled
-   * by the browser/environment (e.g., Vercel proxy, existing session).
+   * NEW: A helper function to fetch with a timeout.
    */
-  const authenticatedFetch = async (url) => {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(
-        `API request failed: ${response.status} ${response.statusText} for ${url}`
-      );
-    }
-    return response;
+  const fetchWithTimeout = (url, timeout = config.apiTimeout) => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        controller.abort();
+        reject(new Error('API Timeout'));
+      }, timeout);
+    });
+
+    const fetchPromise = fetch(url, { signal });
+
+    return Promise.race([fetchPromise, timeoutPromise]);
   };
 
   const streamEmailEvents = async (domain, emailId, since, until) => {
     const baseUrl = `https://${domain}`;
-    // Use a proxy to bypass CORS issues if running on a different domain than the API
-    // For Vercel, you might configure rewrites in vercel.json
-    // Or, for simplicity, we'll try a direct call assuming CORS is set up or it's same-origin.
     const url = `${baseUrl}/api/email-performance/${emailId}/events?since=${since}&until=${until}`;
-    
-    // HACK: To make this work without a real backend proxy, we'll use a CORS proxy.
-    // Replace this with your own proxy or Vercel rewrites for production.
     const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
     
     let response;
     try {
-      response = await fetch(proxyUrl); // Using proxy
-      // response = await authenticatedFetch(url); // Direct call
+      // UPDATED: Use fetchWithTimeout
+      response = await fetchWithTimeout(proxyUrl);
     } catch (e) {
-      console.error("Fetch failed, trying dummy data...", e);
+      console.error("Fetch failed (timeout or network error):", e);
       throw new Error("API request failed, falling back to dummy data.");
     }
     
@@ -138,12 +135,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const baseUrl = `https://${domain}`;
     const url = `${baseUrl}/api/profiles/public/${userId}`;
-
-    // HACK: Use CORS proxy again
     const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
     
-    const response = await fetch(proxyUrl); // Using proxy
-    // const response = await authenticatedFetch(url); // Direct call
+    // UPDATED: Use fetchWithTimeout
+    const response = await fetchWithTimeout(proxyUrl);
     
     if (!response.ok) {
         throw new Error("Failed to fetch user profile");
@@ -159,12 +154,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const getAllSentEmails = async (domain, limit) => {
     const baseUrl = `https://${domain}`;
     const url = `${baseUrl}/api/email-service/emails/sent?limit=${limit}`;
-
-    // HACK: Use CORS proxy again
     const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
 
-    const response = await fetch(proxyUrl); // Using proxy
-    // const response = await authenticatedFetch(url); // Direct call
+    // UPDATED: Use fetchWithTimeout
+    const response = await fetchWithTimeout(proxyUrl);
 
     if (!response.ok) {
         throw new Error("Failed to fetch sent emails");
@@ -176,14 +169,38 @@ document.addEventListener('DOMContentLoaded', () => {
     return result.data;
   };
 
+  // --- UPDATED DUMMY DATA ---
+
+  const getRelativeDate = (daysAgo, hours = 0, minutes = 0) => {
+    const date = new Date();
+    date.setDate(date.getDate() - daysAgo);
+    date.setHours(date.getHours() - hours);
+    date.setMinutes(date.getMinutes() - minutes);
+    return date.toISOString();
+  };
+
   const getDummySentEmails = () => {
     console.warn("Using dummy data for sent emails list.");
     return [
-      { id: "dummy-email-1", title: "The Heart Behind the Care 💙", thumbnailUrl: null, sentAt: "2025-09-05T18:00:00.364Z", sender: { name: "Marcus Barlow" }, targetAudience: { totalRecipients: 150 } },
-      { id: "dummy-email-2", title: "Weekly Newsletter", thumbnailUrl: null, sentAt: "2025-08-29T15:00:00.422Z", sender: { name: "Nicole Adams" }, targetAudience: { totalRecipients: 1200 } },
-      { id: "dummy-email-3", title: "Townhall Briefing", thumbnailUrl: null, sentAt: "2025-08-26T14:00:00.561Z", sender: { name: "Nicole Adams" }, targetAudience: { totalRecipients: 85 } },
+      { id: "dummy-email-1", title: "The Heart Behind the Care 💙", thumbnailUrl: null, sentAt: getRelativeDate(2), sender: { name: "Marcus Barlow" }, targetAudience: { totalRecipients: 150 } },
+      { id: "dummy-email-2", title: "Weekly Newsletter", thumbnailUrl: null, sentAt: getRelativeDate(7), sender: { name: "Nicole Adams" }, targetAudience: { totalRecipients: 1200 } },
+      { id: "dummy-email-3", title: "Townhall Briefing", thumbnailUrl: null, sentAt: getRelativeDate(15), sender: { name: "Nicole Adams" }, targetAudience: { totalRecipients: 85 } },
     ];
   };
+  
+  const getDummyData = () => {
+    console.warn("Using dummy data for email performance widget.");
+    return [
+      { user: { id: "dummy1", firstName: "Nicole", lastName: "Adams", avatarUrl: "https://cdn.prod.website-files.com/65b3b9f9bfb500445a7573e5/65dda761c0fad5c4f2e3b9ae_OGS%20Female%20Student.png" }, sentTime: getRelativeDate(1, 2, 5), wasOpened: true, opens: [{ openTime: getRelativeDate(1, 1, 0), clicks: [{ clickTime: getRelativeDate(1, 0, 55), targetUrl: "https://www.staffbase.com/blog/" }] }] },
+      { user: { id: "dummy2", firstName: "Eira", lastName: "Topé", avatarUrl: null }, sentTime: getRelativeDate(1, 2, 5), wasOpened: true, opens: [{ openTime: getRelativeDate(0, 20, 0), clicks: [] }] },
+      { user: { id: "dummy3", firstName: "Jean", lastName: "Kirstein", avatarUrl: "" }, sentTime: getRelativeDate(1, 2, 5), wasOpened: false, opens: [] },
+      { user: { id: "dummy4", firstName: "Ash", lastName: "Krishnan", avatarUrl: null }, sentTime: getRelativeDate(1, 2, 5), wasOpened: true, opens: [{ openTime: getRelativeDate(0, 10, 30), clicks: [] }] },
+      { user: { id: "dummy5", firstName: "Shirley", lastName: "Lai", avatarUrl: null }, sentTime: getRelativeDate(1, 2, 5), wasOpened: false, opens: [] },
+      { user: { id: "dummy6", firstName: "Jon", lastName: "Lam", avatarUrl: null }, sentTime: getRelativeDate(1, 2, 5), wasOpened: false, opens: [] },
+    ];
+  };
+
+  // --- DATA FETCHING LOGIC ---
 
   const getSentEmailsData = async (domain, limit) => {
     if (domain.toLowerCase().includes("dummy")) {
@@ -191,6 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     try {
       const emails = await getAllSentEmails(domain, limit);
+      // UPDATED: Load dummy data if API returns empty or null
       if (!emails || emails.length === 0) {
         console.log("No sent emails found. Loading dummy data.");
         return getDummySentEmails();
@@ -198,19 +216,126 @@ document.addEventListener('DOMContentLoaded', () => {
       return emails;
     } catch (error) {
       console.error(
-        "❗️ Failed to get sent emails list, returning dummy data as fallback.",
+        `❗️ Failed to get sent emails list (${error.message}). Loading dummy data as fallback.`,
         error
       );
       return getDummySentEmails();
     }
   };
+  
+  const getEmailPerformanceData = async (emailId, domain, since, until) => {
+    if (!emailId || emailId.toLowerCase().includes("dummy")) {
+      return getDummyData();
+    }
+    try {
+      const events = await streamEmailEvents(domain, emailId, since, until);
+      // UPDATED: Load dummy data if API returns empty
+      if (events.length === 0) {
+        console.log("No events found for this email. Loading dummy data.");
+        return getDummyData();
+      }
+      
+      const results = await processEvents(domain, events);
+      // UPDATED: Load dummy data if processing returns empty
+      if (results.length === 0) {
+          console.log("Event processing resulted in no data. Loading dummy data.");
+          return getDummyData();
+      }
+      return results;
+      
+    } catch (error) {
+      console.error(
+        `❗️ Failed to get email performance data (${error.message}). Loading dummy data as fallback.`,
+        error
+      );
+      return getDummyData();
+    }
+  };
+
+  // --- HELPER FUNCTIONS (from React component) ---
+
+  const toInputDateTimeString = (date) => {
+    const pad = (num) => num.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
+
+  function createSafeNow() {
+    const now = new Date();
+    now.setSeconds(now.getSeconds() - 10); // 10 sec buffer
+    return now;
+  };
+
+  const formatDisplayDateTime = (isoString) => {
+    if (!isoString) return "N/A";
+    return new Date(isoString).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+  };
+  
+  const escapeCsvField = (field) => {
+    if (field === null || field === undefined) return '""';
+    const stringField = String(field);
+    if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
+      return `"${stringField.replace(/"/g, '""')}"`;
+    }
+    return `"${stringField}"`;
+  };
+
+  // --- EVENT HANDLERS (Fetching) ---
+  
+  // UPDATED: Simplified fetchAllEmails
+  const fetchAllEmails = async () => {
+    state.loading = true;
+    state.error = null;
+    render();
+    try {
+      // getSentEmailsData now handles all fallback logic
+      const result = await getSentEmailsData(config.domain, config.emaillistlimit);
+      state.allEmails = result;
+    } catch (err) {
+      // This catch is for unexpected errors, though getSentEmailsData should be robust
+      state.error = "A critical error occurred. Loading dummy data.";
+      state.allEmails = getDummySentEmails();
+    } finally {
+      state.loading = false;
+      render();
+    }
+  };
+  
+  // UPDATED: Simplified fetchRecipientData
+  const fetchRecipientData = async () => {
+    state.loading = true;
+    state.error = null;
+    state.recipientData = null;
+    render();
+    
+    try {
+      // getEmailPerformanceData now handles all fallback logic
+      const result = await getEmailPerformanceData(
+        state.selectedEmailId, 
+        config.domain, 
+        state.detailSinceDate.toISOString(), 
+        state.detailUntilDate.toISOString()
+      );
+      state.recipientData = result;
+    } catch (err) {
+      // This catch is for unexpected errors
+      state.error = "A critical error occurred. Loading dummy data.";
+      state.recipientData = getDummyData();
+    } finally {
+      state.loading = false;
+      render();
+    }
+  };
+
+  // --- REMAINDER OF THE CODE (UNCHANGED) ---
+  
+  // --- RENDERING FUNCTIONS (replaces JSX) ---
 
   const processEvents = async (domain, events) => {
     if (!events || events.length === 0) return [];
     
     const eventsByUser = new Map();
     for (const event of events) {
-      if (!event || !event.eventSubject) continue; // Safety check
+      if (!event || !event.eventSubject) continue;
       const userIdMatch = event.eventSubject.match(/user\/(.*)/);
       if (userIdMatch && userIdMatch[1]) {
         const userId = userIdMatch[1];
@@ -273,81 +398,8 @@ document.addEventListener('DOMContentLoaded', () => {
       a.user.lastName.localeCompare(b.user.lastName)
     );
   };
-
-  const getDummyData = () => {
-    console.warn("Using dummy data for email performance widget.");
-    return [
-      { user: { id: "dummy1", firstName: "Nicole", lastName: "Adams", avatarUrl: "https://cdn.prod.website-files.com/65b3b9f9bfb500445a7573e5/65dda761c0fad5c4f2e3b9ae_OGS%20Female%20Student.png" }, sentTime: "2025-09-16T10:05:01Z", wasOpened: true, opens: [{ openTime: "2025-09-16T10:05:11Z", clicks: [{ clickTime: "2025-09-16T10:05:15Z", targetUrl: "https://www.staffbase.com/blog/" }] }] },
-      { user: { id: "dummy2", firstName: "Eira", lastName: "Topé", avatarUrl: null }, sentTime: "2025-09-15T14:29:55Z", wasOpened: true, opens: [{ openTime: "2025-09-15T14:30:00Z", clicks: [] }] },
-      { user: { id: "dummy3", firstName: "Jean", lastName: "Kirstein", avatarUrl: "" }, sentTime: "2025-09-14T09:00:10Z", wasOpened: false, opens: [] },
-      { user: { id: "dummy4", firstName: "Ash", lastName: "Krishnan", avatarUrl: null }, sentTime: "2025-09-15T14:29:55Z", wasOpened: true, opens: [{ openTime: "2025-09-15T14:30:00Z", clicks: [] }] },
-      { user: { id: "dummy5", firstName: "Shirley", lastName: "Lai", avatarUrl: null }, sentTime: "2025-09-15T14:29:55Z", wasOpened: false, opens: [] },
-      { user: { id: "dummy6", firstName: "Jon", lastName: "Lam", avatarUrl: null }, sentTime: "2025-09-15T14:29:55Z", wasOpened: false, opens: [] },
-    ];
-  };
-
-  const getEmailPerformanceData = async (emailId, domain, since, until) => {
-    if (!emailId || emailId.toLowerCase().includes("dummy")) {
-      return getDummyData();
-    }
-    try {
-      const events = await streamEmailEvents(domain, emailId, since, until);
-      if (events.length === 0) {
-        console.log("No events found for this email in the selected time range. Loading dummy data.");
-        return getDummyData();
-      }
-      
-      const results = await processEvents(domain, events);
-      if (results.length === 0) {
-          console.log("Event processing resulted in no data. Loading dummy data.");
-          return getDummyData();
-      }
-      return results;
-      
-    } catch (error) {
-      console.error(
-        "❗️ Failed to get email performance data, returning dummy data as fallback.",
-        error
-      );
-      return getDummyData();
-    }
-  };
-
-  // --- HELPER FUNCTIONS (from React component) ---
-
-  const toInputDateTimeString = (date) => {
-    const pad = (num) => num.toString().padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-  };
-
-  function createSafeNow() {
-    const now = new Date();
-    now.setSeconds(now.getSeconds() - 10); // 10 sec buffer
-    return now;
-  };
-
-  const formatDisplayDateTime = (isoString) => {
-    if (!isoString) return "N/A";
-    return new Date(isoString).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
-  };
   
-  const escapeCsvField = (field) => {
-    if (field === null || field === undefined) return '""';
-    const stringField = String(field);
-    if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
-      return `"${stringField.replace(/"/g, '""')}"`;
-    }
-    return `"${stringField}"`;
-  };
-
-  // --- RENDERING FUNCTIONS (replaces JSX) ---
-
-  /**
-   * Main render function.
-   * Reads the global state and updates the DOM.
-   */
   const render = () => {
-    // 1. Show/Hide main containers
     loadingContainer.style.display = state.loading ? 'block' : 'none';
     errorContainer.style.display = state.error ? 'block' : 'none';
     listView.style.display = (!state.loading && !state.error && state.currentView === 'list') ? 'block' : 'none';
@@ -357,10 +409,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (state.error) {
       errorContainer.textContent = state.error;
-      return;
+      // Don't return; allow rendering to proceed with dummy data if it was loaded
     }
 
-    // 2. Render the correct view
     if (state.currentView === 'list') {
       renderListView();
     } else if (state.currentView === 'detail') {
@@ -369,33 +420,35 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   
   const renderListView = () => {
-    // Update date inputs
     sinceDateInput.value = toInputDateTimeString(state.sinceDate);
     untilDateInput.value = toInputDateTimeString(state.untilDate);
     
-    // Filter and paginate emails
     const filteredEmails = state.allEmails.filter(email => {
         const sent = new Date(email.sentAt);
         return sent >= state.sinceDate && sent <= state.untilDate;
     });
     
     const emailPageCount = Math.ceil(filteredEmails.length / state.emailsPerPage);
+    // Reset page if current page is out of bounds
+    if (state.emailListPage >= emailPageCount && emailPageCount > 0) {
+        state.emailListPage = emailPageCount - 1;
+    }
+
     const paginatedEmails = filteredEmails.slice(
         state.emailListPage * state.emailsPerPage, 
         (state.emailListPage + 1) * state.emailsPerPage
     );
 
-    // Render email list
-    emailListContainer.innerHTML = ''; // Clear old list
+    emailListContainer.innerHTML = '';
     if (paginatedEmails.length > 0) {
       paginatedEmails.forEach(email => {
         emailListContainer.appendChild(createEmailListItemElement(email));
       });
     } else {
+      // This is where "no emails found" comes from. It's correct if filters match nothing.
       emailListContainer.innerHTML = '<div class="message-container">No emails found for the selected period.</div>';
     }
 
-    // Render pagination
     emailPageSizeSelect.value = state.emailsPerPage;
     emailPageInfo.textContent = `Page ${state.emailListPage + 1} of ${emailPageCount || 1}`;
     emailPrevPageBtn.disabled = state.emailListPage === 0;
@@ -405,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const createEmailListItemElement = (email) => {
     const item = document.createElement('div');
     item.className = 'email-list-item';
-    item.dataset.emailId = email.id; // Store ID for click handler
+    item.dataset.emailId = email.id;
     
     const recipientCount = email.targetAudience?.totalRecipients;
     
@@ -429,28 +482,22 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
     
-    // Add click listener
     item.addEventListener('click', () => handleEmailSelect(email.id));
-    
     return item;
   };
 
   const renderDetailView = () => {
-    // Update header
     const selectedEmailTitle = state.allEmails.find(e => e.id === state.selectedEmailId)?.title || "Email";
     detailTitle.textContent = `"${selectedEmailTitle}" Performance`;
     
-    // Update controls
     recipientSearchInput.value = state.recipientSearchTerm;
     detailSinceDateInput.value = toInputDateTimeString(state.detailSinceDate);
     detailUntilDateInput.value = toInputDateTimeString(state.detailUntilDate);
     backButton.style.display = config.allemailsview ? 'flex' : 'none';
     exportCsvButton.style.display = config.enablecsvdownload ? 'flex' : 'none';
     
-    // Calculate stats
-    if (state.recipientData && state.selectedEmailId) {
+    if (state.recipientData && state.recipientData.length > 0) {
       const selectedEmail = state.allEmails.find(e => e.id === state.selectedEmailId);
-      // Use recipientData.length as the source of truth for "Total Recipients" if API for sent emails fails
       const totalRecipients = selectedEmail?.targetAudience?.totalRecipients ?? state.recipientData.length;
       const totalOpens = state.recipientData.reduce((sum, interaction) => sum + interaction.opens.length, 0);
       const uniqueOpens = state.recipientData.filter(interaction => interaction.wasOpened).length;
@@ -459,7 +506,6 @@ document.addEventListener('DOMContentLoaded', () => {
       state.emailStats = null;
     }
     
-    // Render stats
     if (state.emailStats) {
       emailStatsContainer.innerHTML = `
         <div class="stat-item">
@@ -479,41 +525,40 @@ document.addEventListener('DOMContentLoaded', () => {
       emailStatsContainer.innerHTML = '';
     }
     
-    // Sort, filter, and paginate recipients
     const sortedRecipients = getSortedRecipients();
     const filteredRecipients = sortedRecipients.filter(r => 
       `${r.user.firstName} ${r.user.lastName}`.toLowerCase().includes(state.recipientSearchTerm.toLowerCase())
     );
     
     const recipientPageCount = Math.ceil(filteredRecipients.length / state.recipientsPerPage);
+    if (state.recipientPage >= recipientPageCount && recipientPageCount > 0) {
+        state.recipientPage = recipientPageCount - 1;
+    }
+
     const paginatedRecipients = filteredRecipients.slice(
         state.recipientPage * state.recipientsPerPage, 
         (state.recipientPage + 1) * state.recipientsPerPage
     );
     
-    // Render table
-    recipientTableContainer.innerHTML = ''; // Clear old table
+    recipientTableContainer.innerHTML = '';
     if (paginatedRecipients.length > 0) {
       recipientTableContainer.appendChild(createRecipientTableElement(paginatedRecipients));
     } else {
-      recipientTableContainer.innerHTML = `<div class="message-container">${state.recipientData ? 'No matching recipients found.' : 'No recipient data available for this email in the selected date range.'}</div>`;
+      recipientTableContainer.innerHTML = `<div class="message-container">${(state.recipientData && state.recipientData.length > 0) ? 'No matching recipients found.' : 'No recipient data available for this email in the selected date range.'}</div>`;
     }
     
-    // Render pagination
     recipientPageSizeSelect.value = state.recipientsPerPage;
     recipientPageInfo.textContent = `Page ${state.recipientPage + 1} of ${recipientPageCount || 1}`;
     recipientPrevPageBtn.disabled = state.recipientPage === 0;
     recipientNextPageBtn.disabled = state.recipientPage >= recipientPageCount - 1;
     
-    // CSV button state
-    exportCsvButton.disabled = !state.recipientData || filteredRecipients.length === 0;
+    exportCsvButton.disabled = !filteredRecipients || filteredRecipients.length === 0;
   };
   
   const createRecipientTableElement = (recipients) => {
     const table = document.createElement('table');
     table.className = 'performance-table';
     
-    // Table Header
     const thead = document.createElement('thead');
     thead.innerHTML = `
       <tr>
@@ -521,12 +566,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <th role="button" style="width: 120px" data-sort-key="status">Status</th>
       </tr>
     `;
-    // Add sort click listeners
     thead.querySelectorAll('th[role="button"]').forEach(th => {
       th.addEventListener('click', () => handleSort(th.dataset.sortKey));
     });
     
-    // Table Body
     const tbody = document.createElement('tbody');
     recipients.forEach(interaction => {
       const [row, detailsRow] = createRecipientRowElements(interaction);
@@ -572,7 +615,6 @@ document.addEventListener('DOMContentLoaded', () => {
       </td>
     `;
     
-    // Create details row
     const detailsRow = document.createElement('tr');
     detailsRow.className = 'details-row';
     
@@ -611,7 +653,6 @@ document.addEventListener('DOMContentLoaded', () => {
       </td>
     `;
 
-    // Add click listener to toggle details
     if (isExpandable) {
       row.addEventListener('click', () => {
         detailsRow.classList.toggle('expanded');
@@ -639,7 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <g>
             <circle cx="85.5" cy="85.5" r="85.5" fill="#e0e0e0"/>
             <path d="M49.2,53.9,78.8,87a8.94,8.94,0,0,0,6.7,3,9.1,9.1,0,0,0,6.7-3l29.1-32.6a1.56,1.56,0,0,1,.8-.6,10.57,10.57,0,0,0-4-.8H52.9a10.06,10.06,0,0,0-3.9.8A.35.35,0,0,0,49.2,53.9Z" fill="#fff"/>
-            <path d="M126.5,58a1.8,1.8,0,0,1-.6.9l-29,32.5a15.38,15.38,0,0,1-11.4,5.1,15.54,15.54,0,0,1-11.4-5.1L44.6,58.3l-.2-.2A9.75,9.75,0,0,0,43,63.2V108a9.94,9.94,0,0,0,10,9.9h65a9.94,9.Code,0,0,10-9.9V63.2a10.19,10.19,0,0,0-1.5-5.2" fill="#fff"/>
+            <path d="M126.5,58a1.8,1.8,0,0,1-.6.9l-29,32.5a15.38,15.38,0,0,1-11.4,5.1,15.54,15.54,0,0,1-11.4-5.1L44.6,58.3l-.2-.2A9.75,9.75,0,0,0,43,63.2V108a9.94,9.94,0,0,0,10,9.9h65a9.94,9.94,0,0,0,10-9.9V63.2a10.19,10.19,0,0,0-1.5-5.2" fill="#fff"/>
           </g>
         </svg>
       </div>
@@ -673,52 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return sortableData;
   };
 
-  // --- EVENT HANDLERS ---
-  
-  const fetchAllEmails = async () => {
-    state.loading = true;
-    state.error = null;
-    render();
-    try {
-      const result = await getSentEmailsData(config.domain, config.emaillistlimit);
-      state.allEmails = result;
-      if (result.length === 0) {
-        state.error = "No sent emails found.";
-      }
-    } catch (err) {
-      state.error = "Failed to fetch sent emails. Using dummy data as fallback.";
-      state.allEmails = getDummySentEmails();
-    } finally {
-      state.loading = false;
-      render();
-    }
-  };
-  
-  const fetchRecipientData = async () => {
-    state.loading = true;
-    state.error = null;
-    state.recipientData = null;
-    render();
-    
-    try {
-      const result = await getEmailPerformanceData(
-        state.selectedEmailId, 
-        config.domain, 
-        state.detailSinceDate.toISOString(), 
-        state.detailUntilDate.toISOString()
-      );
-      state.recipientData = result;
-      if (result.length === 0) {
-         state.error = "No recipient data found for this email.";
-      }
-    } catch (err) {
-      state.error = "Failed to fetch analytics data. Using dummy data as fallback.";
-      state.recipientData = getDummyData();
-    } finally {
-      state.loading = false;
-      render();
-    }
-  };
+  // --- EVENT HANDLERS (UI) ---
 
   const handleEmailSelect = (id) => {
     const selectedEmail = state.allEmails.find(email => email.id === id);
@@ -756,7 +752,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let since = type === 'since' ? newDate : state.detailSinceDate;
     let until = type === 'until' ? newDate : state.detailUntilDate;
     
-    // 30 day limit logic from original component
     const thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000;
     const diff = until.getTime() - since.getTime();
     if (diff > thirtyDaysInMillis) {
@@ -843,7 +838,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- INITIALIZATION ---
 
   const init = () => {
-    // Set initial dates
     const now = createSafeNow();
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(now.getDate() - 30);
@@ -852,10 +846,9 @@ document.addEventListener('DOMContentLoaded', () => {
     state.untilDate = now;
     state.detailSinceDate = thirtyDaysAgo;
     state.detailUntilDate = now;
-
+    
     // Attach event listeners
     
-    // List View
     sinceDateInput.addEventListener('change', (e) => {
       state.sinceDate = new Date(e.target.value);
       state.emailListPage = 0;
@@ -878,12 +871,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
     emailNextPageBtn.addEventListener('click', () => {
-      // Logic to check max page is in render()
       state.emailListPage++;
       render();
     });
 
-    // Detail View
     backButton.addEventListener('click', handleBackToList);
     recipientSearchInput.addEventListener('input', (e) => {
       state.recipientSearchTerm = e.target.value;
@@ -917,10 +908,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.currentView === 'list') {
       fetchAllEmails();
     } else if (state.currentView === 'detail' && state.selectedEmailId) {
-      // Need to fetch all emails first to get title, then fetch recipient data
       state.loading = true;
       state.error = null;
       render();
+      // First fetch all emails (to get title) then fetch recipient data
       getSentEmailsData(config.domain, config.emaillistlimit)
         .then(emails => {
           state.allEmails = emails;
@@ -928,6 +919,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(err => {
           state.error = "Failed to fetch initial email data.";
+          state.allEmails = getDummySentEmails(); // Ensure fallback
           state.loading = false;
           render();
         });
